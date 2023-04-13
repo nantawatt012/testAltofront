@@ -1,23 +1,32 @@
 import Head from "next/head";
-import Image from "next/image";
+// import Image from "next/image";
 import { Inter } from "next/font/google";
-import styles from "@/styles/Home.module.css";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import axios from "./api/axios";
+import { useState } from "react";
+import UserInfoList from "../component/UserInfoList";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const [userList, setUserList] = useState([]);
+
   const {
     register,
     handleSubmit,
     formState: { errors }
   } = useForm();
-  const onSubmit = (data) => {
-    axios
-      .post("http://localhost:8000/user/add", data)
-      .then((response) => console.log(response.data))
-      .catch((error) => console.error(error));
+
+  const onSubmit = async (data) => {
+    console.log(data);
+    const res = await axios.post("/api/users", data);
+    // console.log(res);
+  };
+
+  const handleGetUsers = async () => {
+    const res = await axios.get("/api/users");
+    setUserList(res.data);
+    // console.log(userList);
   };
 
   return (
@@ -28,34 +37,42 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
+      <main>
         <div>
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="w-full max-w-md mx-auto"
+            className="w-full max-w-md mx-auto mt-[10vh]"
           >
-            <div className="grid grid-cols-2 gap-4">
-              <label
-                htmlFor="firstName"
-                className="block font-medium text-gray-700"
-              >
+            <div className="grid grid-cols-2 gap-2">
+              <label htmlFor="firstName" className="font-medium text-black">
                 Firstname:
               </label>
               <input
                 type="text"
                 {...register("firstName", { required: true })}
-                className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+                className="mt-2 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
               />
-              {errors.firstName && <p>This field is required</p>}
-              <br />
-              <label htmlFor="lastName">Lastname:</label>
+            </div>
+            {errors.firstName && (
+              <p className="text-red-700">This field is required</p>
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              <label htmlFor="lastName" className="font-medium text-black">
+                Lastname:
+              </label>
               <input
                 type="text"
                 {...register("lastName", { required: true })}
+                className="mt-2 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
               />
-              {errors.lastName && <p>This field is required</p>}
-              <br />
-              <label htmlFor="email">Email:</label>
+            </div>
+            {errors.lastName && (
+              <p className="text-red-700">This field is required</p>
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              <label htmlFor="email" className="font-medium text-black">
+                Email:
+              </label>
               <input
                 type="email"
                 id="email"
@@ -63,26 +80,44 @@ export default function Home() {
                   required: true,
                   pattern: /^\S+@\S+$/i
                 })}
+                className="mt-2 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
               />
-              {errors.email && (
-                <p>Please enter a valid email address and can not be empty</p>
-              )}
-              <br />
-              <label htmlFor="phoneNum">Phone Number:</label>
+            </div>
+            {errors.email && (
+              <p className="text-red-700">
+                Please enter a valid email address and can not be empty
+              </p>
+            )}
+            <div className="grid grid-cols-2 gap-2">
+              <label htmlFor="mobileNum" className="font-medium text-black">
+                Phone Number:
+              </label>
               <input
-                {...register("phoneNum", {
+                {...register("mobileNum", {
                   pattern: {
                     value: /^[0-9]{10}$/i,
                     message: "Invalid phone number"
                   }
                 })}
+                className="mt-2 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
               />
-              {errors.phoneNum && <p>Invalid phone number</p>}
-              <br />
-              <br />
-              <input type="submit" />{" "}
             </div>
+            {errors.mobileNum && (
+              <p className="text-red-700">Invalid phone number</p>
+            )}
+            <input
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
+            />
           </form>
+          <button
+            onClick={handleGetUsers}
+            className="bg-orange-400 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded mt-2"
+          >
+            Show All user
+          </button>
+
+          {userList && <UserInfoList userInfo={userList} />}
         </div>
       </main>
     </>
