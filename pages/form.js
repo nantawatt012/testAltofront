@@ -1,5 +1,4 @@
 import Head from "next/head";
-// import Image from "next/image";
 import { Inter } from "next/font/google";
 import { useForm } from "react-hook-form";
 import axios from "./api/axios";
@@ -10,6 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
   const [userList, setUserList] = useState([]);
+  const [isListNull, setIsListNull] = useState(0);
 
   const {
     register,
@@ -18,15 +18,28 @@ export default function Home() {
   } = useForm();
 
   const onSubmit = async (data) => {
-    console.log(data);
-    const res = await axios.post("/api/users", data);
-    // console.log(res);
+    try {
+      console.log(data);
+      const res = await axios.post("/api/users", data);
+      // console.log(res);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const handleGetUsers = async () => {
-    const res = await axios.get("/api/users");
-    setUserList(res.data);
-    // console.log(userList);
+    try {
+      const res = await axios.get("/api/users");
+      if (res.status === 200) {
+        setUserList(res.data);
+        setIsListNull(0);
+      }
+    } catch (err) {
+      // console.log(err);
+      // console.log(isListNull);
+      console.error("no data");
+      setIsListNull(1);
+    }
   };
 
   return (
@@ -112,11 +125,15 @@ export default function Home() {
           </form>
           <button
             onClick={handleGetUsers}
-            className="bg-orange-400 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded mt-2"
+            className="bg-orange-400 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded mt-2 ml-12"
           >
             Show All user
           </button>
-
+          {isListNull ? (
+            <p className="text-red-700 text-lg font-semibold ml-12 mt-2">
+              no users in data
+            </p>
+          ) : null}
           {userList && <UserInfoList userInfo={userList} />}
         </div>
       </main>
